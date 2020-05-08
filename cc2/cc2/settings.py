@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '(hn-z+5@e&tl+-@g+4_&%^#2gv2lh)a!p7!e*c5me-9d$zd_*('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1','cloudcomputing-2-275420.uc.r.appspot.com']
 
@@ -160,3 +160,8 @@ EMAIL_HOST_USER = 'sun.devil.lost.found@gmail.com'
 EMAIL_HOST_PASSWORD = 'cloudcomputing2@'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+
+
+AUTHENTICATION_BACKENDS = (
+        'django.contrib.auth.backends.ModelBackend',
+    )

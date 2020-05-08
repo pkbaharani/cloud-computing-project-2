@@ -79,7 +79,8 @@ def get_timestamp():
     # Displays something like: Aug. 27, 2017, 2:57 p.m.
     #formatedDate = myDate.strftime("%Y-%m-%d %H:%M:%S")
     print (timestamp)
-    return timestamp
+    date=datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
+    return timestamp,date
 
 
 
@@ -113,7 +114,7 @@ def post_sensitive_item(request):
     if not request.user.is_authenticated:
         return 1, "username not registered"
     sensitive = SensitiveFound()
-    timestamp=get_timestamp()
+    timestamp,date=get_timestamp()
     cardtype = request.POST['cardtype']
     print('saving row')
     description = request.POST['description']
@@ -127,7 +128,7 @@ def post_sensitive_item(request):
     sensitive.username=username
     sensitive.cardtype=cardtype
     sensitive.fourdigit=last_four_digit
-    sensitive.timestamp=timestamp
+    sensitive.timestamp=date
     color=''
     if 'color' in request.POST:
         color=request.POST['color']
@@ -135,7 +136,7 @@ def post_sensitive_item(request):
         color='NA'
     sensitive.color=color
     sensitive.postid=postid
-
+    sensitive.displayflag=True
     sensitive.save()
     # to send email to both the parties if there is a match.
     check_sensitive_lost_repo(cardtype,campuslocation,color,last_four_digit,username,postid)
@@ -146,8 +147,10 @@ def post_sensitive_item(request):
 @csrf_exempt
 def post_lost_general_item(request):
 
-    timestamp=get_timestamp()
+
+    timestamp,date=get_timestamp()
     itemtype = request.POST['categorySelect']
+
     description = request.POST['description']
     campuslocation = request.POST['campusSelect']
     address = request.POST['address']
@@ -166,7 +169,7 @@ def post_lost_general_item(request):
     lost_gen_item.description = description
     lost_gen_item.campuslocation = campuslocation
     lost_gen_item.itemtype = itemtype
-    lost_gen_item.timestamp = timestamp
+    lost_gen_item.timestamp = date
     lost_gen_item.address = address
     url=""
     if image != None:
@@ -181,7 +184,8 @@ def post_lost_general_item(request):
 @csrf_exempt
 def post_general_item(request):
 
-    timestamp=get_timestamp()
+
+    timestamp,date=get_timestamp()
     itemtype=request.POST['categorySelect']
     description=request.POST['description']
     campuslocation=request.POST['campusSelect']
@@ -205,7 +209,7 @@ def post_general_item(request):
     gen_item.campuslocation=campuslocation
     gen_item.itemtype=itemtype
     gen_item.imagelink=url
-    gen_item.timestamp=timestamp
+    gen_item.timestamp=date
     gen_item.address=address
     gen_item.postid=postid
 
@@ -219,11 +223,11 @@ def validatecred(request):
     username=request.POST['username']
     password=request.POST['password']
     print('username is ', username, ' password is ', password)
-    user=Users.objects.filter(username=username)
+    user=User.objects.filter(username=username)
     if len(user) ==0:
         return None
 
-    user=Users.objects.filter(username=username)
+    user=User.objects.filter(username=username)
     print(user[0].password)
     if password != user[0].password:
         return None
@@ -232,9 +236,10 @@ def validatecred(request):
 @csrf_exempt
 def post_lost_sensitive_item(request):
 
-    timestamp=get_timestamp()
+    timestamp,date=get_timestamp()
     username = request.user.username
     #userCount = Users.objects.filter(username=username).count()
+
 
     #if userCount < 1:
     if not request.user.is_authenticated:
@@ -263,10 +268,12 @@ def post_lost_sensitive_item(request):
         color=request.POST['color']
     lost.cardtype = cardtype
     lost.description = description
-    lost.timestamp = timestamp
+    lost.timestamp = date
     lost.postid=postid
-
+    print(username)
+    lost.displayflag=True
     lost.save()
+    print(username)
     print("saving the row")
     # to send email to both the parties if there is a match.
     check_sensitive_found_repo(cardtype, campuslocation, color, last_four_digit,username,postid)
@@ -438,8 +445,8 @@ def check_sensitive_found_repo(cardtype,campuslocation,color,lastfourdigit,lost_
               " and receiver 2 who has lost the item", lost_username)
 
 
-        lost_emailid = Users.objects.filter(username=lost_username)[0].emailid
-        found_emailid = Users.objects.filter(username=found_username)[0].emailid
+        lost_emailid = User.objects.filter(username=lost_username)[0].email
+        found_emailid = User.objects.filter(username=found_username)[0].email
 
         resolvelink = 'http://127.0.0.1:8000/lostfound/resolve/?postid='+str(lost_postid)
         send_notification(username1=lost_username, username2=found_username, user1_emailid=lost_emailid,
@@ -479,8 +486,8 @@ def check_sensitive_lost_repo(cardtype,campuslocation,color,lastfourdigit,found_
         lost_postid=lost[i].postid
 
         print("sending email to both the parties i.e receiver1 who has found the item = ",found_username," and receiver 2 who has lost the item", lost_username)
-        lost_emailid=Users.objects.filter(username=lost_username)[0].emailid
-        found_emailid=Users.objects.filter(username=found_username)[0].emailid
+        lost_emailid=User.objects.filter(username=lost_username)[0].email
+        found_emailid=User.objects.filter(username=found_username)[0].email
 
         print("sending email to both the parties i.e receiver1 who has found the item = ", found_username,
               " and receiver 2 who has lost the item", lost_username,'  at user 1 email id ',lost_emailid, ' and user 2  email id ',found_emailid )
@@ -521,20 +528,24 @@ def logout(request):
 
     
 def resolvePost(request):
+    #import pdb;pdb.set_trace()
     post=request.GET['postid']
     requesttype=post.split("-")[0]
     print(post)
     table=None
     if requesttype == 'lostsensitive':
-        table= SensitiveLost()
+        table= SensitiveLost
     if requesttype == 'foundgeneral' :
-        table= general()
+        table= general
     if requesttype =='lostgeneral'  :
-        table=GeneralLost()
+        table=GeneralLost
     if requesttype == 'foundsensitive':
-        table= SensitiveFound()
+        table= SensitiveFound
 
-    #table.objects.filter(postid=post)[0].update(displayflag=False)
+    tab=table.objects.get(postid=post)
+    tab.displayflag=False
+    tab.save()
+
     return HttpResponse('<h1> successfully updated table  </h1>')
 
 
