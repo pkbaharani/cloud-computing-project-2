@@ -1,0 +1,21 @@
+{% extends "lostfound/base.html" %}
+
+{%block content%}
+<div class="row justify-content-center">
+        <p>{{message}}</p>
+        <form action="." method="post" class="form-signup">
+		  <h1 class="h3 mb-3 font-weight-normal">Welcome, Please sign up</h1>
+
+		  <label for="inputUsn" class="sr-only">Email address</label>
+		  <input type="text" name="username" id="inputUsn" class="form-control" placeholder="Username" required autofocus>
+        
+		  <label for="inputEmail" class="sr-only">Email address</label>
+		  <input type="email" name="emailid" id="inputEmail" class="form-control" placeholder="Email address" required>
+		  <label for="inputPassword" class="sr-only">Password</label>
+		  <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+		  <br>
+		  <button class="btn btn-lg btn-warning btn-block" type="submit">Sign up</button>
+		  <p class="mt-5 mb-3 text-muted">&copy; Covid-19 ASU Graduates</p>
+		</form>
+      </div>
+{%endblock%}
