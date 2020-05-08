@@ -4,6 +4,9 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from django.http import JsonResponse
 #from django.utils import simplejson
+from django.core import mail, serializers
+from django.core.mail import EmailMessage
+from django.core.mail import send_mail
 
 
 
@@ -16,7 +19,7 @@ from .models import SensitiveFound
 from .models import SensitiveLost
 
 # Create your views here.
-
+sender_id='sun.devils.lost.found@gmail.com'
 #-instances=<cc2databse>=tcp:1433 -cloudcomputing-2-1199e18857f7.json
 #google creds
 gcreds={
@@ -34,6 +37,8 @@ gcreds={
 
 def home(request):
     return HttpResponse('<h1> Lost and Found Home. You can \n search lost item \n report any item found \n search sensitive item </h1>')
+
+
 
 @csrf_exempt
 def register(request):
@@ -122,7 +127,7 @@ def post_sensitive_item(request):
     sensitive.color=color
     sensitive.save()
     # to send email to both the parties if there is a match.
-    check_sensitive_lost_repo(cardtype,campuslocation,color,last_four_digit)
+    check_sensitive_lost_repo(cardtype,campuslocation,color,last_four_digit,username)
 
     return HttpResponse('<h1> post successful </h1>')
 
@@ -135,7 +140,7 @@ def post_general_item(request):
     itemtype=request.POST['itemtype']
     description=request.POST['description']
     campuslocation=request.POST['campuslocation']
-    address=request.POST['campuslocation']
+    address=request.POST['address']
     username=request.POST['username']
     image = request.FILES['image']
     userCount = Users.objects.filter(username=username).count()
@@ -173,7 +178,7 @@ def validatecred(request):
         return HttpResponse('<h1> wrong password </h1>')
     return HttpResponse('<h1> Login was successful  </h1>')
 
-
+@csrf_exempt
 def post_lost_sensitive_item(request):
     username = request.POST['username']
     userCount = Users.objects.filter(username=username).count()
@@ -191,13 +196,13 @@ def post_lost_sensitive_item(request):
 
     ''
 
-    check_sensitive_found_repo(cardtype=cardtype,campuslocation=campuslocation,color=color,last_four_digit=last_four_digit)
+    #check_sensitive_found_repo(cardtype=cardtype,campuslocation=campuslocation,color=color,lastfourdigit=last_four_digit)
     lost=SensitiveLost()
 
     lost.fourdigit=last_four_digit
     lost.username = username
-    lost.campuslocation = last_four_digit
-    lost.address = last_four_digit
+    lost.campuslocation = campuslocation
+    lost.address = address
     lost.color = color
     lost.cardtype = cardtype
     lost.description = description
@@ -205,7 +210,7 @@ def post_lost_sensitive_item(request):
     lost.save()
 
     # to send email to both the parties if there is a match.
-    check_sensitive_found_repo(cardtype, campuslocation, color, last_four_digit)
+    check_sensitive_found_repo(cardtype, campuslocation, color, last_four_digit,username)
     return HttpResponse('<h1> Post successful </h1>')
 
 
@@ -229,25 +234,71 @@ def display_general_items(request):
         result['itemtype'] = gen[i].itemtype
         result['description'] = gen[i].description
         result['campuslocation'] = gen[i].campuslocation
-
         response[i]=result
+
     return JsonResponse(response)
 
+def send_notification(username1,username2,user1_emailid,user2_emailid,resolve):
 
-def check_sensitive_found_repo(cardtype,campuslocation,color,lastfourdigit):
+    resolutionlink='\n please use the link below to mark this post as resolved \n'+str(resolve)
+
+    subject='There was subscription made to your post'
+    body=' \n There was a potential match to your post, please contact user '+str(username2)+' at '+str(user2_emailid)
+    body='Hello '+str(username1)+body+','
+    body=body+resolutionlink
+    body=body+' \n Regards, \n Sun Devils Lost and Found'
+    body=str(body)
+    send_mail(
+        subject,
+        body,
+        'sun.devil.lost.found@gmail.com',
+        ['prateek.baharani25@gmail.com'],
+        fail_silently=False,
+    )
+def check_sensitive_found_repo(cardtype,campuslocation,color,lastfourdigit,lost_username):
     # called when some one reports that their item has been lost
-    sensitive = SensitiveFound.objects.filter(cardtype=cardtype, campuslocation=campuslocation,
+    sensitivefound = SensitiveFound.objects.filter(cardtype=cardtype, campuslocation=campuslocation,
                                               fourdigit=lastfourdigit)
 
-    if len(sensitive) == 0:
+    if len(sensitivefound) == 0:
         return None
 
+    for i in range(len(sensitivefound)):
+        found_username = sensitivefound[i].username
+        print("sending email to both the parties i.e receiver1 who has found the item = ", found_username,
+              " and receiver 2 who has lost the item", lost_username)
+
+
+        lost_emailid = Users.objects.filter(username=lost_username)[0].emailid
+        found_emailid = Users.objects.filter(username=found_username)[0].emailid
+
+        resolvelink = ' resolve link for ', lost_username
+        send_notification(username1=lost_username, username2=found_username, user1_emailid=lost_emailid,
+                          user2_emailid=found_emailid, resolve=resolvelink)
+
+        '''
+        print("sending email to both the parties i.e receiver1 who has found the item = ", found_username,
+              " and receiver 2 who has lost the item", lost_username, '  at user 1 email id ', lost_emailid,
+              ' and user 2  email id ', found_emailid)
+        '''
+
+        resolvelink = ' resolve link for ', found_username
+        send_notification(username1=found_username, username2=lost_username, user1_emailid=found_emailid,
+                          user2_emailid=lost_emailid, resolve=resolvelink)
+
+
+    '''
     for i in range (len(sensitive)):
+        receiver1=sensitive[i].username
+        print("sending email to both the parties i.e receiver1 who has found the item = ",lost_username," and receiver 2 who has lost the item", receiver1)
+
+        #print("sending email to both the parties",sensitive[i].username)
         # send email to the username of lost and found both
-        pass
+
+    '''
 
 
-def check_sensitive_lost_repo(cardtype,campuslocation,color,lastfourdigit):
+def check_sensitive_lost_repo(cardtype,campuslocation,color,lastfourdigit,found_username):
     # called when some one reports a found item.
     lost=SensitiveLost.objects.filter(cardtype=cardtype, campuslocation=campuslocation,
                                               fourdigit=lastfourdigit)
@@ -255,13 +306,28 @@ def check_sensitive_lost_repo(cardtype,campuslocation,color,lastfourdigit):
         return None
 
     for i in range(len(lost)):
+        lost_username=lost[i].username
+        print("sending email to both the parties i.e receiver1 who has found the item = ",found_username," and receiver 2 who has lost the item", lost_username)
+        lost_emailid=Users.objects.filter(username=lost_username)[0].emailid
+        found_emailid=Users.objects.filter(username=found_username)[0].emailid
+
+        print("sending email to both the parties i.e receiver1 who has found the item = ", found_username,
+              " and receiver 2 who has lost the item", lost_username,'  at user 1 email id ',lost_emailid, ' and user 2  email id ',found_emailid )
+
+        resolvelink=' resolve link for ',str(lost_username)
+
+        send_notification(username1= lost_username,username2=found_username,user1_emailid=lost_emailid,user2_emailid=found_emailid,resolve=resolvelink)
+        resolvelink=' resolve link for ' +str(found_username)
+        send_notification(username1=found_username, username2=lost_username, user1_emailid=found_emailid,user2_emailid=lost_emailid,resolve=resolvelink)
+
+
         # send email to the username of lost and found both
-        pass
 
 @csrf_exempt
 def login(request):
     #display login page
     return render(request,'lostfound/login.html')
+
 
 def found(request):
     return HttpResponse('<h1> Report anything that you have found </h1>')

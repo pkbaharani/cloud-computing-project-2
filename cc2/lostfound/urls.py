@@ -11,5 +11,6 @@ urlpatterns=[path('',views.home,name='Lost-Found-Home'),
              path('postgeneralitem/',views.post_general_item,name='new post item'),
              path('register/',views.register,name='new post item'),
              path('postsensitiveitem/',views.post_sensitive_item,name='new post item'),
+             path('postlostsensitiveitem/',views.post_lost_sensitive_item,name='new post item'),
              path('display_general_items/',views.display_general_items,name='new post item'),
              ]
