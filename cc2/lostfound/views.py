@@ -13,7 +13,7 @@ from time import time
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-
+from django.conf import settings
 
 
 from gcloud import storage
@@ -134,7 +134,7 @@ def post_sensitive_item(request):
     sensitive.campuslocation=campuslocation
     sensitive.address=address
     sensitive.description=description
-    sensitive.username=username
+    sensitive.user = request.user
     sensitive.cardtype=cardtype
     sensitive.fourdigit=last_four_digit
     sensitive.timestamp=date
@@ -142,13 +142,13 @@ def post_sensitive_item(request):
     if 'color' in request.POST:
         color=request.POST['color']
     else:
-        color='NA'
+        color='NA'  
     sensitive.color=color
     sensitive.postid=postid
     sensitive.displayflag=True
     sensitive.save()
     # to send email to both the parties if there is a match.
-    check_sensitive_lost_repo(cardtype,campuslocation,color,last_four_digit,username,postid)
+    check_sensitive_lost_repo(cardtype,campuslocation,color,last_four_digit,request.user,postid)
 
     return 0, "post successful"
 
@@ -176,7 +176,7 @@ def post_lost_general_item(request):
 
     postid='lostgeneral-'+username+'-'+str(timestamp)
     lost_gen_item = GeneralLost()
-    lost_gen_item.username = username
+    lost_gen_item.user = request.user
     lost_gen_item.description = description
     lost_gen_item.campuslocation = campuslocation
     lost_gen_item.itemtype = itemtype
@@ -219,7 +219,7 @@ def post_general_item(request):
     url = str(uploadgcp(image,username))
 
     gen_item=general()
-    gen_item.username=username
+    gen_item.user = request.user
     gen_item.description=description
     gen_item.campuslocation=campuslocation
     gen_item.itemtype=itemtype
@@ -278,7 +278,7 @@ def post_lost_sensitive_item(request):
     lost=SensitiveLost()
 
     lost.fourdigit=last_four_digit
-    lost.username = username
+    lost.user = request.user
     lost.campuslocation = campuslocation
     lost.address = address
     color=''
@@ -297,7 +297,7 @@ def post_lost_sensitive_item(request):
     print(username)
     print("saving the row")
     # to send email to both the parties if there is a match.
-    check_sensitive_found_repo(cardtype, campuslocation, color, last_four_digit,username,postid)
+    check_sensitive_found_repo(cardtype, campuslocation, color, last_four_digit,request.user,postid)
     return 0,  "Post successful"
 
 """
@@ -433,12 +433,12 @@ def display_general_lost_items(request):
     return render(request,'lostfound/found.html', {"search": gen,})
             
 
-def send_notification(username1,username2,user1_emailid,user2_emailid,resolve):
+def send_notification(username1,username2,user1_emailid,user2_emailid,resolve, cardtype,campuslocation,lastfourdigit):
 
     resolutionlink='\n please use the link below to mark this post as resolved \n'+str(resolve)
 
-    subject='There was subscription made to your post'
-    body=' \n There was a potential match to your post, please contact user '+str(username2)+' at '+str(user2_emailid)
+    subject='SunDevils Lost n Found: Your item may have found a potential match'
+    body=' \n There was a potential match to your post for your {} with last 4 digits as {} found at {}, please contact user '.format(cardtype, lastfourdigit, campuslocation) + str(username2)+' at '+str(user2_emailid)
     body='Hello '+str(username1)+body+','
     body=body+resolutionlink
     body=body+' \n Regards, \n Sun Devils Lost and Found'
@@ -449,10 +449,10 @@ def send_notification(username1,username2,user1_emailid,user2_emailid,resolve):
         subject,
         body,
         'sun.devil.lost.found@gmail.com',
-        ['prateek.baharani25@gmail.com'],
+        [user1_emailid],
         fail_silently=False,
     )
-def check_sensitive_found_repo(cardtype,campuslocation,color,lastfourdigit,lost_username,lost_postid):
+def check_sensitive_found_repo(cardtype,campuslocation,color,lastfourdigit,lost_user,lost_postid):
     # called when some one reports that their item has been lost
     sensitivefound = SensitiveFound.objects.filter(cardtype=cardtype, campuslocation=campuslocation,
                                               fourdigit=lastfourdigit)
@@ -461,19 +461,19 @@ def check_sensitive_found_repo(cardtype,campuslocation,color,lastfourdigit,lost_
         return None
 
     for i in range(len(sensitivefound)):
-        found_username = sensitivefound[i].username
+        found_user = sensitivefound[i].user
         found_postid =sensitivefound[i].postid
 
-        print("sending email to both the parties i.e receiver1 who has found the item = ", found_username,
-              " and receiver 2 who has lost the item", lost_username)
+        print("sending email to both the parties i.e receiver1 who has found the item = ", found_user.username,
+              " and receiver 2 who has lost the item", lost_user.username)
 
 
-        lost_emailid = User.objects.filter(username=lost_username)[0].email
-        found_emailid = User.objects.filter(username=found_username)[0].email
+        lost_emailid = lost_user.email
+        found_emailid = found_user.email
 
-        resolvelink = 'http://127.0.0.1:8000/lostfound/resolve/?postid='+str(lost_postid)
-        send_notification(username1=lost_username, username2=found_username, user1_emailid=lost_emailid,
-                          user2_emailid=found_emailid, resolve=resolvelink)
+        resolvelink = "http://" + settings.HOST_URL + "/lostfound/resolve/?postid="+str(lost_postid)
+        send_notification(username1=lost_user.username, username2=found_user.username, user1_emailid=lost_user.email,
+                          user2_emailid=found_user.email, resolve=resolvelink, cardtype=cardtype,campuslocation=campuslocation,lastfourdigit=lastfourdigit)
 
         '''
         print("sending email to both the parties i.e receiver1 who has found the item = ", found_username,
@@ -481,9 +481,9 @@ def check_sensitive_found_repo(cardtype,campuslocation,color,lastfourdigit,lost_
               ' and user 2  email id ', found_emailid)
         '''
 
-        resolvelink = 'http://127.0.0.1:8000/lostfound/resolve/?postid='+str(found_postid)
-        send_notification(username1=found_username, username2=lost_username, user1_emailid=found_emailid,
-                          user2_emailid=lost_emailid, resolve=resolvelink)
+        resolvelink = "http://" + settings.HOST_URL + "/lostfound/resolve/?postid="+str(found_postid)
+        send_notification(username1=found_user.username, username2=lost_user.username, user1_emailid=found_user.email,
+                          user2_emailid=lost_user.email, resolve=resolvelink, cardtype=cardtype,campuslocation=campuslocation,lastfourdigit=lastfourdigit)
 
 
     '''
@@ -497,29 +497,34 @@ def check_sensitive_found_repo(cardtype,campuslocation,color,lastfourdigit,lost_
     '''
 
 
-def check_sensitive_lost_repo(cardtype,campuslocation,color,lastfourdigit,found_username,found_postid):
+def check_sensitive_lost_repo(cardtype,campuslocation,color,lastfourdigit,found_user,found_postid):
     # called when some one reports a found item.
     lost=SensitiveLost.objects.filter(cardtype=cardtype, campuslocation=campuslocation,
                                               fourdigit=lastfourdigit)
     if len(lost) == 0:
         return None
+    
+    found_username = found_user.username
 
     for i in range(len(lost)):
-        lost_username=lost[i].username
+        lost_user=lost[i].user
+        lost_username = lost_user.username
         lost_postid=lost[i].postid
 
         print("sending email to both the parties i.e receiver1 who has found the item = ",found_username," and receiver 2 who has lost the item", lost_username)
-        lost_emailid=User.objects.filter(username=lost_username)[0].email
-        found_emailid=User.objects.filter(username=found_username)[0].email
+        lost_emailid=lost_user.email
+        found_emailid=found_user.email
 
         print("sending email to both the parties i.e receiver1 who has found the item = ", found_username,
               " and receiver 2 who has lost the item", lost_username,'  at user 1 email id ',lost_emailid, ' and user 2  email id ',found_emailid )
 
-        resolvelink = 'http://127.0.0.1:8000/lostfound/resolve/?postid='+str(lost_postid)
-        send_notification(username1= lost_username,username2=found_username,user1_emailid=lost_emailid,user2_emailid=found_emailid,resolve=resolvelink)
+        resolvelink = "http://" + settings.HOST_URL + "/lostfound/resolve/?postid="+str(lost_postid)
+        send_notification(username1= lost_username,username2=found_username,user1_emailid=lost_emailid,
+                            user2_emailid=found_emailid,resolve=resolvelink, cardtype=cardtype,campuslocation=campuslocation,lastfourdigit=lastfourdigit)
 
-        resolvelink = 'http://127.0.0.1:8000/lostfound/resolve/?postid='+str(found_postid)
-        send_notification(username1=found_username, username2=lost_username, user1_emailid=found_emailid,user2_emailid=lost_emailid,resolve=resolvelink)
+        resolvelink = "http://" + settings.HOST_URL + "/lostfound/resolve/?postid="+str(found_postid)
+        send_notification(username1=found_username, username2=lost_username, user1_emailid=found_emailid,
+                            user2_emailid=lost_emailid,resolve=resolvelink, cardtype=cardtype,campuslocation=campuslocation,lastfourdigit=lastfourdigit)
 
 
         # send email to the username of lost and found both

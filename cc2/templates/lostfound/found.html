@@ -47,6 +47,8 @@
               <th scope="col">Category</th>
               <th scope="col">Title</th>
               <th scope="col">Campus Location</th>
+              <th scope="col">Found Date</th>
+              <th scope="col">Contact Email</th>
             </tr>
           </thead>
           
@@ -57,8 +59,10 @@
                   <th scope="row">{{item.id}}</th>
                   <td><img src="{{item.imagelink}}"  height="100"/></td>
                   <td>{{item.itemtype}}</td>
-                  <td>{{item.description}}</td>
+                  <td>{{item.title}}</td>
                   <td>{{item.campuslocation}}</td>
+                  <td>{{item.lost_found_date}}</td>
+                  <td>{{item.user.email}}</td>
                 </tr>
             {% endfor %}
           </tbody>
