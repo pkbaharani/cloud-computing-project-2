@@ -109,8 +109,11 @@ def post_sensitive_item(request):
     username = request.user.username
     #userCount = Users.objects.filter(username=username).count()
 
+
     #if userCount < 1:
+
     #import pdb; pdb.set_trace()
+
     if not request.user.is_authenticated:
         return 1, "username not registered"
     sensitive = SensitiveFound()
@@ -172,7 +175,7 @@ def post_lost_general_item(request):
 
 
     postid='lostgeneral-'+username+'-'+str(timestamp)
-    lost_gen_item = general()
+    lost_gen_item = GeneralLost()
     lost_gen_item.username = username
     lost_gen_item.description = description
     lost_gen_item.campuslocation = campuslocation
@@ -253,7 +256,6 @@ def post_lost_sensitive_item(request):
     timestamp,date=get_timestamp()
     username = request.user.username
     #userCount = Users.objects.filter(username=username).count()
-
 
     #if userCount < 1:
     if not request.user.is_authenticated:
@@ -401,6 +403,7 @@ def display_general_lost_items(request):
     
     if request.method == "GET":
         gen=GeneralLost.objects.all().order_by('timestamp')[:30]
+        print(gen)
         print("Return all items")
         return render(request,'lostfound/lost.html', { "search": gen,})
     else:
@@ -426,6 +429,7 @@ def display_general_lost_items(request):
             result['campuslocation'] = gen[i].campuslocation
             search.append(result)"""
         
+    print(gen)
     return render(request,'lostfound/found.html', {"search": gen,})
             
 
@@ -541,7 +545,7 @@ def login_user(request):
         return HttpResponseRedirect('/lostfound/homepage/')
         
 @csrf_exempt
-def logout(request):
+def logout_user(request):
     logout(request)
     return HttpResponseRedirect('/lostfound/login/')
 
@@ -570,7 +574,7 @@ def resolvePost(request):
 
 @csrf_exempt
 def homepage(request):
-    return HttpResponse('<h1> Welcome to homepage </h1>')                                                          
+    return render(request,'lostfound/homepage.html')                                                         
                                                             
 
 def found(request):
