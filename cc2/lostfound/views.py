@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-import psycopg2
+from datetime import datetime
 from django.http import JsonResponse
 #from django.utils import simplejson
 
@@ -37,6 +37,7 @@ def home(request):
 
 @csrf_exempt
 def register(request):
+
     user=Users()
     username = request.POST["username"]
     password = request.POST['password']
@@ -60,15 +61,26 @@ def register(request):
     return HttpResponse('<h1> user successfully registered </h1>')
 
 
+def get_timestamp():
+    myDate = datetime.now()
 
-def uploadgcp(image):
+    # Give a format to the date
+    # Displays something like: Aug. 27, 2017, 2:57 p.m.
+    #formatedDate = myDate.strftime("%Y-%m-%d %H:%M:%S")
+    print (myDate)
+    return myDate
+
+
+
+def uploadgcp(image,username):
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(
         gcreds
     )
 
+    imagename=username+str(get_timestamp())
     client = storage.Client(credentials=credentials,project='cloudcomputing-2')
     bucket = client.get_bucket('cc2-image-db')
-    blob = bucket.blob('image',chunk_size=262144)
+    blob = bucket.blob(imagename,chunk_size=262144)
     '''
     with open("D:\\All Softwares Installation\\djtest\djtest1\\lostfound\\uploadimage.jpg", 'rb') as photo:
         blob.upload_from_file(image)
@@ -101,6 +113,7 @@ def post_sensitive_item(request):
     sensitive.username=username
     sensitive.cardtype=cardtype
     sensitive.fourdigit=last_four_digit
+    sensitive.timestamp=get_timestamp()
     color=''
     if 'color' in request.POST:
         color=request.POST['color']
@@ -121,7 +134,8 @@ def post_general_item(request):
 
     itemtype=request.POST['itemtype']
     description=request.POST['description']
-    location=request.POST['location']
+    campuslocation=request.POST['campuslocation']
+    address=request.POST['campuslocation']
     username=request.POST['username']
     image = request.FILES['image']
     userCount = Users.objects.filter(username=username).count()
@@ -129,14 +143,16 @@ def post_general_item(request):
     if userCount <1 :
         return HttpResponse('<h1> username not registered </h1>')
 
-    url = str(uploadgcp(image))
+    url = str(uploadgcp(image,username))
 
     gen_item=general()
     gen_item.username=username
     gen_item.description=description
-    gen_item.location=location
+    gen_item.campuslocation=campuslocation
     gen_item.itemtype=itemtype
     gen_item.imagelink=url
+    gen_item.timestamp=get_timestamp()
+    gen_item.address=address
     gen_item.save()
 
     return HttpResponse('<h1> post successful </h1>')
@@ -173,7 +189,7 @@ def post_lost_sensitive_item(request):
     address = request.POST['address']
     last_four_digit = request.POST['lastfourdigit']
 
-
+    ''
 
     check_sensitive_found_repo(cardtype=cardtype,campuslocation=campuslocation,color=color,last_four_digit=last_four_digit)
     lost=SensitiveLost()
@@ -185,6 +201,7 @@ def post_lost_sensitive_item(request):
     lost.color = color
     lost.cardtype = cardtype
     lost.description = description
+    lost.timestamp = get_timestamp()
     lost.save()
 
     # to send email to both the parties if there is a match.
@@ -196,11 +213,11 @@ def post_lost_sensitive_item(request):
 def display_general_items(request):
     # called when some one reports that their item has been lost
     itemtype = request.GET['itemtype']
-    campuslocation = request.GET['location']
+    campuslocation = request.GET['campuslocation']
 
     print('looking into ',itemtype,'  campuslocation ',campuslocation)
     #color = request.GET['color']
-    gen=general.objects.filter(location=campuslocation,itemtype=itemtype)
+    gen=general.objects.filter(campuslocation=campuslocation,itemtype=itemtype).order_by('timestamp')
     print(gen)
     response={}
     result={}
@@ -209,7 +226,10 @@ def display_general_items(request):
     for i in range ( len(gen)) :
         result['username']=gen[i].username
         result['imagelink'] = gen[i].imagelink
-        result['username'] = gen[i].username
+        result['itemtype'] = gen[i].itemtype
+        result['description'] = gen[i].description
+        result['campuslocation'] = gen[i].campuslocation
+
         response[i]=result
     return JsonResponse(response)
 

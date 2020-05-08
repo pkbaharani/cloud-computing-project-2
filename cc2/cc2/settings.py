@@ -25,7 +25,7 @@ SECRET_KEY = '(hn-z+5@e&tl+-@g+4_&%^#2gv2lh)a!p7!e*c5me-9d$zd_*('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1','cloudcomputing-2-275420.uc.r.appspot.com']
 
 
 # Application definition
