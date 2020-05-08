@@ -22,15 +22,15 @@ $(document).ready(function(){
 <form>
           <div class="form-group">
             <label for="categorySelect">Please select category</label>
-            <select class="form-control" id="categorySelect">
-              <option>Electronics</option>
-              <option>Bags, Baggage, Luggage</option>
-              <option>Clothing</option>
-              <option>Documents / literature (non-sensitive)</option>
-              <option>Electronics</option>
-              <option>Jewelry</option>
-              <option>Personal Accessories</option>
-              <option>Sensitive items (passport, id card, credit cards)</option>
+            <select class="form-control" name="categorySelect" id="categorySelect">
+              <option value="Electronics">Electronics</option>
+              <option value="Bags, Baggage, Luggage">Bags, Baggage, Luggage</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Non Sensitive Documents">Documents / literature (non-sensitive)</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Jewelry">Jewelry</option>
+              <option value="Personal">Personal Accessories</option>
+              <option value="Sensitive items">Sensitive items (passport, id card, credit cards)</option>
               <option>Others</option>
             </select>
           </div>
@@ -38,35 +38,40 @@ $(document).ready(function(){
           <div class="form-group row">
             <label for="postTitle" class="col-md-2 col-form-label">Post Title</label>
             <div class="sol-md-10">
-              <input class="form-control" type="text" placeholder="Ex. Found black Garmin watch near SDFC" id="postTitle">
+              <input class="form-control" type="text" placeholder="Ex. Found black Garmin watch near SDFC" id="postTitle" name="postTitle">
             </div>
           </div>
 
           <div class="form-group row">
             <label for="dateSelect" class="col-md-2 col-form-label">Found Date</label>
             <div class="sol-md-10">
-              <input class="form-control" type="text" id="dateSelect">
+              <input class="form-control" type="text" id="dateSelect" name="dateSelect">
             </div>
           </div>
 
           <div class="form-group">
             <label for="campusSelect">Please select campus</label>
-            <select class="form-control" id="campusSelect">
-              <option>Downtown Phoenix Campus</option>
-              <option>Tempe Campus</option>
-              <option>Colleges at Lake Havasu City</option>
-              <option>Polytechnic Campus</option>
-              <option>West Campus</option>
+            <select class="form-control" id="campusSelect" name="campusSelect">
+              <option value="Downtown Phoenix Campus">Downtown Phoenix Campus</option>
+              <option value="Tempe Campus">Tempe Campus</option>
+              <option value="Colleges at Lake Havasu City">Colleges at Lake Havasu City</option>
+              <option value="Polytechnic Campus">Polytechnic Campus</option>
+              <option value="West Campus">West Campus</option>
             </select>
           </div>
 
           <div class="form-group">
+            <label for="address"></label>
+            <input class="form-control" type="text" name="address">
+          </div>
+          
+          <div class="form-group">
             <label for="cardtype">Please select sub category</label>
-            <select class="form-control" id="cardtype">
-              <option>Passport</option>
-              <option>SSN</option>
-              <option>Student ID Card</option>
-              <option>Others</option>
+            <select class="form-control" id="cardtype" name="cardtype">
+              <option value="Passport">Passport</option>
+              <option value="SSN">SSN</option>
+              <option value="Student ID Card">Student ID Card</option>
+              <option value="Others">Others</option>
             </select>
           </div>
 
@@ -77,12 +82,12 @@ $(document).ready(function(){
 
           <div class="form-group">
             <label for="description">Description and details of the item</label>
-            <textarea class="form-control" id="description" rows="3"></textarea>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
           </div>
 
           <div class="form-group">
             <label for="image">Upload Item's Image</label>
-            <input type="file" class="form-control-file" id="image">
+            <input type="file" class="form-control-file" id="image" name="image">
           </div>
         
 

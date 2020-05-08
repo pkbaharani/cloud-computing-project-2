@@ -4,10 +4,10 @@
 <div class="row">
         <div class="col-9">
           <h5>Filter here</h5>
-          <form>
+          <form action="." method="post">
             <div class="form-row">
               <div class="form-group col-md-4">
-                <select id="itemtype" class="form-control">
+                <select id="itemtype" name="itemtype" class="form-control">
                   <option selected="true" disabled="disabled">Select Item Category</option>
                   <option>Electronics</option>
                   <option>Bags, Baggage, Luggage</option>
@@ -22,7 +22,7 @@
               </div>
 
               <div class="form-group col-md-4">
-                <select id="campuslocation" class="form-control">
+                <select id="campuslocation" name="campuslocation" class="form-control">
                   <option selected="true" disabled="disabled">Select Campus</option>
                   <option>Downtown Phoenix Campus</option>
                   <option>Tempe Campus</option>
@@ -43,8 +43,8 @@
         <table class="table table-bordered table-striped">
            <thead class="thead-dark">
             <tr>
-              <th scope="col">Photo</th>
               <th scope="col">Listing Id</th>
+              <th scope="col">Photo</th>
               <th scope="col">Category</th>
               <th scope="col">Title</th>
               <th scope="col">Campus Location</th>
@@ -52,13 +52,16 @@
           </thead>
           
           <tbody>
-            <tr>
-              <th scope="row"></th>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
+            {% for i in list %}
+
+                <tr>
+                  <th scope="row"></th>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+            {% endfor %}
           </tbody>
       </table>
       </div>
