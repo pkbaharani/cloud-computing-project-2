@@ -1,21 +1,41 @@
 {% extends "lostfound/base.html" %}
 
 {%block content%}
-<div class="row justify-content-center">
-        <p>{{message}}</p>
+	{% if message != "regsitered"%}
+	<br>
+	<br>
+	{% if message_error %}
+	<div class="row justify-content-center">
+		<span class="text-danger"><h3>Username or password is invalid.</h3></span>
+	</div>
+		<br>
+	{% endif%}
+	<div class="row justify-content-center">
         <form action="." method="post" class="form-signup">{% csrf_token %}
-		  <h1 class="h3 mb-3 font-weight-normal">Welcome, Please sign up</h1>
+		  <h1 class="h3 mb-3 font-weight-normal">Welcome SunDevils, Please sign up</h1>
 
 		  <label for="inputUsn" class="sr-only">Email address</label>
-		  <input type="text" name="username" id="inputUsn" class="form-control" placeholder="Username" required autofocus>
+		  <input type="text" name="username" id="inputUsn" class="form-control" placeholder="username" required autofocus>
         
 		  <label for="inputEmail" class="sr-only">Email address</label>
-		  <input type="email" name="emailid" id="inputEmail" class="form-control" placeholder="Email address" required>
+		  <input type="email" name="emailid" id="inputEmail" class="form-control" placeholder="email address" required>
 		  <label for="inputPassword" class="sr-only">Password</label>
-		  <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+		  <input type="password" name="password" id="inputPassword" class="form-control" placeholder="password" required>
 		  <br>
 		  <button class="btn btn-lg btn-warning btn-block" type="submit">Sign up</button>
-		  <p class="mt-5 mb-3 text-muted">&copy; Covid-19 ASU Graduates</p>
 		</form>
       </div>
+     {% elif message == "regsitered" and not message_error %}
+     <br>
+	 <br>
+      <div class="row justify-content-center">
+      	<span class="text-danger"><h3>Thank you, Registeration successfull.</h3></span> 
+      </div>
+      <br>
+      <div class="row justify-content-center">
+      	<a href="/lostfound/login/" class="btn btn-warning" role="button">Log in</a>
+      </div>
+
+     {% endif %}
+	
 {%endblock%}

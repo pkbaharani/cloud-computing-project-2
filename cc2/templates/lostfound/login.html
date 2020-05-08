@@ -1,18 +1,26 @@
 {% extends "lostfound/base.html" %}
 
 {%block content%}
+
+{% if message_error %}
+	<div class="row justify-content-center">
+		<span class="text-danger"><h3>Username or password is invalid.</h3></span>
+	</div>
+	<br>
+{% endif%}
+
 <div class="row justify-content-center">
-        <p>{{error_message}}</p>
         <form action="." method="post" class="form-signin">{% csrf_token %}
-          <img class="mb-4" src="https://brandguide.asu.edu/sites/default/files/styles/panopoly_image_original/public/asu_pitchfork_gold_maroon_gold.png?itok=jg1ADRb7" alt="" width=" 100" height="100">
-		  <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        
+        <div class="text-center">
+        	<img class="mb-4" src="https://brandguide.asu.edu/sites/default/files/styles/panopoly_image_original/public/asu_pitchfork_gold_maroon_gold.png?itok=jg1ADRb7" alt="" width="200" height="369">	
+        </div>
 		  <label for="inputUsername" class="sr-only">Username</label>
 		  <input type="text" id="inputUsername" name="username" class="form-control" placeholder="Username" required autofocus>
 		  <label for="inputPassword" class="sr-only">Password</label>
 		  <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
 		  <br>
 		  <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-		  <p class="mt-5 mb-3 text-muted">&copy; Data Vaders</p>
 		</form>
       </div>
 {%endblock%}

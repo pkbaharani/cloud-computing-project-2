@@ -1,17 +1,23 @@
  {% extends "lostfound/base.html" %}
 
  {% load static %}
-<
+
  {%block content%}
   <div class="row">
         <div class="col">
-          <img src="{% static  "lostfound/img/report_found.png" %}">
-          <a class="btn btn-success btn-lg btn-block" role="button" href="#">Search or Report Found Item</a>
+          <div class="text-center">
+            <img src="{% static  "lostfound/img/report_found.png" %}">
+          </div>
+          
+          <a class="btn btn-success btn-lg btn-block" role="button" href="/lostfound/display_general_found_items/">Search or Report Found Item</a>
         </div>
 
         <div class="col align-self-center">
-          <img src="{% static  "lostfound/img/report_lost.png" %}">
-          <a class="btn btn-danger btn-lg btn-block" role="button" href="#">Search or Report Lost Item</a>
+          <div class="text-center">
+            <img src="{% static  "lostfound/img/report_lost.png" %}">
+          </div>
+          
+          <a class="btn btn-danger btn-lg btn-block" role="button" href="/lostfound/display_general_lost_items/">Search or Report Lost Item</a>
         </div>
       </div>
 {%endblock%}

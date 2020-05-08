@@ -1,9 +1,12 @@
 {% extends "lostfound/base.html" %}
 
+
 {%block content%}
 <div class="row">
-        <div class="col-9">
-          <h5>Filter here</h5>
+  <div class="col-9">
+    <br>
+    <br>
+    <h5>Filter here</h5>
           <form action="." method="post">{% csrf_token %}
             <div class="form-row">
               <div class="form-group col-md-4">
@@ -37,6 +40,20 @@
             </div>
             
           </form>
+  </div>
+
+  <div class="col-3">
+    <br><br>
+    <br>
+    <a class="btn btn-success btn-lg btn-block" role="button" href="#">Report Found Item</a>
+  </div>
+  
+</div>
+
+
+<div class="row">
+        <div class="col-9">
+          
 
         <h3>Previous Posts</h3>
         <table class="table table-bordered table-striped">
@@ -54,7 +71,6 @@
           
           <tbody>
             {% for item in search %}
-
                 <tr>
                   <th scope="row">{{item.id}}</th>
                   <td><img src="{{item.imagelink}}"  height="100"/></td>
@@ -68,8 +84,5 @@
           </tbody>
       </table>
       </div>
-        <div class="col-3">
-          <a class="btn btn-success btn-lg btn-block" role="button" href="#">Report Found Item</a>
-        </div>
       </div>
 {%endblock%}

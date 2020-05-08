@@ -62,13 +62,13 @@ def register(request):
         userCount_email = User.objects.filter(email=emailid).count()
 
         if userCount >0 or userCount_email>0:
-            return render(request,'lostfound/signup.html', {"message":"Username or password is invalid", "message_error": True})
+            return render(request,'lostfound/signup.html', {"error_message":"Username or password is invalid", "message_error": True})
         #adding user to the table Users
         user = User.objects.create_user(username, emailid, password)
         #Users.add_to_class(username,emailid,password)
         print("User saved")
 
-        return render(request,'lostfound/signup.html', {"message":"User regsitered successfully", "message_error": False})
+        return render(request,'lostfound/signup.html', {"message":"regsitered", "message_error": False})
 
 
 def get_timestamp():
@@ -544,7 +544,8 @@ def login_user(request):
         if user is None:
             return render(request,'lostfound/login.html', {"username":request.POST["username"],
                                                             "password": request.POST["password"],
-                                                            "error_message": "Username or password is invalid"})
+                                                            "error_message": "Username or password is invalid",
+                                                            "message_error": True})
         
         login(request,user)
         return HttpResponseRedirect('/lostfound/homepage/')
