@@ -110,7 +110,7 @@ def post_sensitive_item(request):
     #userCount = Users.objects.filter(username=username).count()
 
     #if userCount < 1:
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     if not request.user.is_authenticated:
         return 1, "username not registered"
     sensitive = SensitiveFound()
@@ -121,7 +121,13 @@ def post_sensitive_item(request):
     campuslocation = request.POST['campusSelect']
     address = request.POST['address']
     last_four_digit=request.POST['lastfourdigit']
-    postid='foundsensitive-'+username+'-'+str(timestamp)
+    postid = 'foundsensitive-' + username + '-' + str(timestamp)
+
+    title = request.POST['title']
+    lost_found_date = request.POST['lost_found_date']
+    sensitive.title=title
+    sensitive.lost_found_date=lost_found_date
+
     sensitive.campuslocation=campuslocation
     sensitive.address=address
     sensitive.description=description
@@ -154,6 +160,8 @@ def post_lost_general_item(request):
     description = request.POST['description']
     campuslocation = request.POST['campusSelect']
     address = request.POST['address']
+    title = request.POST['title']
+    lost_found_date = request.POST['lost_found_date']
     username = request.user.username
     image = request.FILES['image']
     #userCount = Users.objects.filter(username=username).count()
@@ -171,6 +179,9 @@ def post_lost_general_item(request):
     lost_gen_item.itemtype = itemtype
     lost_gen_item.timestamp = date
     lost_gen_item.address = address
+    lost_gen_item.title=title
+    lost_gen_item.lost_found_date=lost_found_date
+
     url=""
     if image != None:
         url = str(uploadgcp(image, username))
@@ -188,10 +199,11 @@ def post_general_item(request):
     timestamp,date=get_timestamp()
     itemtype=request.POST['categorySelect']
     description=request.POST['description']
+    title = request.POST['title']
+    lost_found_date = request.POST['lost_found_date']
     campuslocation=request.POST['campusSelect']
     address=request.POST['address']
     username=request.user.username
-    
     
     image = request.FILES['image']
     #userCount = Users.objects.filter(username=username).count()
@@ -212,6 +224,8 @@ def post_general_item(request):
     gen_item.timestamp=date
     gen_item.address=address
     gen_item.postid=postid
+    gen_item.title=title
+    gen_item.lost_found_date=lost_found_date
 
     gen_item.save()
 
@@ -249,6 +263,8 @@ def post_lost_sensitive_item(request):
     #sensitive = SensitiveFound()
     #color=request.POST['color']
     cardtype = request.POST['cardtype']
+    title = request.POST['title']
+    lost_found_date=request.POST['lost_found_date']
     description = request.POST['description']
     campuslocation = request.POST['campusSelect']
     address = request.POST['address']
@@ -270,6 +286,9 @@ def post_lost_sensitive_item(request):
     lost.description = description
     lost.timestamp = date
     lost.postid=postid
+    lost.title= title
+    lost.lost_found_date=lost_found_date
+
     print(username)
     lost.displayflag=True
     lost.save()

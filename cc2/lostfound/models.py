@@ -10,6 +10,8 @@ class Users(models.Model):
 
 
 class GeneralLost(models.Model):
+
+    title=models.CharField(max_length=250,default='')
     displayflag = models.BooleanField(default=True)
     postid = models.CharField(max_length=250,blank=False,default=None)
     username=models.CharField(max_length=250)
@@ -19,8 +21,11 @@ class GeneralLost(models.Model):
     campuslocation = models.CharField(max_length=250)
     address = models.CharField(max_length=250, default='')
     timestamp = models.DateField('Time Stamp', default=None, blank=True, null=True)
+    lost_found_date = models.CharField(max_length=250,default='')
 
 class GeneralFound(models.Model):
+
+    title=models.CharField(max_length=250,default='')
     displayflag = models.BooleanField(default=True)
     postid = models.CharField(max_length=250,blank=False,default=None)
     username=models.CharField(max_length=250)
@@ -30,8 +35,12 @@ class GeneralFound(models.Model):
     campuslocation = models.CharField(max_length=250)
     address = models.CharField(max_length=250, default='')
     timestamp = models.DateField('Time Stamp', default=None, blank=True, null=True)
+    lost_found_date = models.CharField(max_length=250,default='')
+
 
 class SensitiveFound(models.Model):
+
+    title = models.CharField(max_length=250,default='')
     displayflag = models.BooleanField(default=True)
     postid = models.CharField(max_length=250,blank=False,default=None)
     username=models.CharField(max_length=250,default='')
@@ -42,8 +51,11 @@ class SensitiveFound(models.Model):
     fourdigit = models.IntegerField(default=0000)
     color = models.CharField(max_length=250,default='')
     timestamp=models.DateField('Time Stamp',default=None, blank=True, null=True)
+    lost_found_date = models.CharField(max_length=250,default='')
 
 class SensitiveLost(models.Model):
+
+    title = models.CharField(max_length=250,default='')
     displayflag = models.BooleanField(default=True)
     postid = models.CharField(max_length=250,blank=False,default=None)
     username = models.CharField(max_length=250, default='')
@@ -54,4 +66,4 @@ class SensitiveLost(models.Model):
     fourdigit = models.IntegerField(default=0000)
     color = models.CharField(max_length=250, default='')
     timestamp = models.DateField('Time Stamp', default=None, blank=True, null=True)
-
+    lost_found_date = models.CharField(max_length=250,default='')
