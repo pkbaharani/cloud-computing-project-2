@@ -13,4 +13,4 @@ urlpatterns=[path('',views.home,name='Lost-Found-Home'),
              path('postsensitiveitem/',views.post_sensitive_item,name='new post item'),
              path('postlostsensitiveitem/',views.post_lost_sensitive_item,name='new post item'),
              path('display_general_items/',views.display_general_items,name='new post item'),
-             ]
+             path('resolve/',views.resolvePost,name='resolve post')]
