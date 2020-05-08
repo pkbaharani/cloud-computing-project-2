@@ -2,15 +2,21 @@
 
 
 {%block javascript%}
-<script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+ <script>
 $(document).ready(function(){
     $("#categorySelect").change(function(){
         $(this).find("option:selected").each(function(){
             var optionValue = $(this).attr("value");
-            if(optionValue){
+            if(optionValue == "Sensitive items"){
                 $("#fourdigit").show();
+                $("#subcategory").show();
+                $("#itemImage").hide();
             } else{
                 $("#fourdigit").hide();
+                $("#subcategory").hide();
+                $("#itemImage").show();
             }
         });
     }).change();
@@ -19,7 +25,7 @@ $(document).ready(function(){
 {%endblock%}
 
 {%block content%}
-<form>
+ <form>
           <div class="form-group">
             <label for="categorySelect">Please select category</label>
             <select class="form-control" name="categorySelect" id="categorySelect">
@@ -27,7 +33,6 @@ $(document).ready(function(){
               <option value="Bags, Baggage, Luggage">Bags, Baggage, Luggage</option>
               <option value="Clothing">Clothing</option>
               <option value="Non Sensitive Documents">Documents / literature (non-sensitive)</option>
-              <option value="Electronics">Electronics</option>
               <option value="Jewelry">Jewelry</option>
               <option value="Personal">Personal Accessories</option>
               <option value="Sensitive items">Sensitive items (passport, id card, credit cards)</option>
@@ -35,18 +40,14 @@ $(document).ready(function(){
             </select>
           </div>
 
-          <div class="form-group row">
-            <label for="postTitle" class="col-md-2 col-form-label">Post Title</label>
-            <div class="sol-md-10">
-              <input class="form-control" type="text" placeholder="Ex. Found black Garmin watch near SDFC" id="postTitle" name="postTitle">
-            </div>
+          <div class="form-group">
+            <label for="postTitle">Post Title</label>
+            <input class="form-control" type="text" placeholder="Ex. Found black Garmin watch near SDFC" id="postTitle" name="postTitle">
           </div>
 
-          <div class="form-group row">
-            <label for="dateSelect" class="col-md-2 col-form-label">Found Date</label>
-            <div class="sol-md-10">
-              <input class="form-control" type="text" id="dateSelect" name="dateSelect">
-            </div>
+          <div class="form-group">
+            <label for="dateSelect">Found Date</label>
+            <input class="form-control" type="text" id="dateSelect" name="dateSelect">
           </div>
 
           <div class="form-group">
@@ -61,31 +62,33 @@ $(document).ready(function(){
           </div>
 
           <div class="form-group">
-            <label for="address"></label>
+            <label for="address">Address</label>
             <input class="form-control" type="text" name="address">
           </div>
           
-          <div class="form-group">
+          <div class="form-group" id="subcategory">
             <label for="cardtype">Please select sub category</label>
             <select class="form-control" id="cardtype" name="cardtype">
               <option value="Passport">Passport</option>
               <option value="SSN">SSN</option>
               <option value="Student ID Card">Student ID Card</option>
+              <option value="Credit/Debit Card">Credit/Debit Card</option>
               <option value="Others">Others</option>
             </select>
           </div>
 
           <div class="form-group" id="fourdigit">
-            <label for="fourdigit"></label>
-            <input class="form-control" type="text" name="fourdigit">
+            <label for="fourdigits">Enter last 4 digits/characters</label>
+            <input class="form-control" type="text" id="fourdigits">
           </div>
+
 
           <div class="form-group">
             <label for="description">Description and details of the item</label>
             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" id="itemImage">
             <label for="image">Upload Item's Image</label>
             <input type="file" class="form-control-file" id="image" name="image">
           </div>
