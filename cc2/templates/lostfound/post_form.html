@@ -25,7 +25,9 @@ $(document).ready(function(){
 {%endblock%}
 
 {%block content%}
- <form>
+<p>{{error_message}}</p>
+<p>{{message}}</p>
+ <form action="." method="post" enctype="multipart/form-data">{% csrf_token %}
           <div class="form-group">
             <label for="categorySelect">Please select category</label>
             <select class="form-control" name="categorySelect" id="categorySelect">
@@ -36,7 +38,7 @@ $(document).ready(function(){
               <option value="Jewelry">Jewelry</option>
               <option value="Personal">Personal Accessories</option>
               <option value="Sensitive items">Sensitive items (passport, id card, credit cards)</option>
-              <option>Others</option>
+              <option value="Others">Others</option>
             </select>
           </div>
 
@@ -79,7 +81,7 @@ $(document).ready(function(){
 
           <div class="form-group" id="fourdigit">
             <label for="fourdigits">Enter last 4 digits/characters</label>
-            <input class="form-control" type="text" id="fourdigits">
+            <input class="form-control" type="text" id="fourdigits" name="lastfourdigit">
           </div>
 
 

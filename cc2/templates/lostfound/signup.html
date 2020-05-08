@@ -3,7 +3,7 @@
 {%block content%}
 <div class="row justify-content-center">
         <p>{{message}}</p>
-        <form action="." method="post" class="form-signup">
+        <form action="." method="post" class="form-signup">{% csrf_token %}
 		  <h1 class="h3 mb-3 font-weight-normal">Welcome, Please sign up</h1>
 
 		  <label for="inputUsn" class="sr-only">Email address</label>

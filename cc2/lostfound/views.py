@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from django.http import JsonResponse
@@ -7,13 +7,18 @@ from django.http import JsonResponse
 from django.core import mail, serializers
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail
+from datetime import datetime
 from time import time
+
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 
 
 
 from gcloud import storage
 from oauth2client.service_account import ServiceAccountCredentials
-from .models import Users
+#from .models import Users
 from .models import GeneralFound as general
 from .models import SensitiveFound
 from .models import SensitiveLost
@@ -44,32 +49,26 @@ def home(request):
 @csrf_exempt
 def register(request):
 
-    print(request)
-    user=Users()
+    if request.method == "GET":
+        return render(request,'lostfound/signup.html')
+    else:
+        #user=User()
+        username = request.POST["username"]
+        password = request.POST['password']
+        emailid = request.POST['emailid']
 
-    username = request.POST["username"]
-    print(username)
-    password = request.POST['password']
-    emailid = request.POST['emailid']
+        # checking if user is already preesnt
+        userCount = User.objects.filter(username=username).count()
+        userCount_email = User.objects.filter(email=emailid).count()
 
-    print("server error")
-    # checking if user is already preesnt
-    userCount = Users.objects.filter(username=username).count()
-    userCount_email = Users.objects.filter(emailid=emailid).count()
-    print("server error")
-    if userCount >0 or userCount_email>0:
-        return HttpResponse('<h1>provided user id or email is already registered, please login </h1>')
+        if userCount >0 or userCount_email>0:
+            return render(request,'lostfound/signup.html', {"message":"Username or password is invalid", "message_error": True})
+        #adding user to the table Users
+        user = User.objects.create_user(username, emailid, password)
+        #Users.add_to_class(username,emailid,password)
+        print("User saved")
 
-    #adding user to the table Users
-
-    user.username=username
-    user.password=password
-    user.emailid=emailid
-    print("server error")
-    user.save()
-    #Users.add_to_class(username,emailid,password)
-
-    return HttpResponse('<h1> user successfully registered </h1>')
+        return render(request,'lostfound/signup.html', {"message":"User regsitered successfully", "message_error": False})
 
 
 def get_timestamp():
@@ -106,17 +105,19 @@ def uploadgcp(image,username):
 
 @csrf_exempt
 def post_sensitive_item(request):
-    username = request.POST['username']
-    userCount = Users.objects.filter(username=username).count()
+    username = request.user.username
+    #userCount = Users.objects.filter(username=username).count()
 
-    if userCount < 1:
-        return HttpResponse('<h1> username not registered </h1>')
+    #if userCount < 1:
+    import pdb; pdb.set_trace()
+    if not request.user.is_authenticated:
+        return 1, "username not registered"
     sensitive = SensitiveFound()
     timestamp=get_timestamp()
     cardtype = request.POST['cardtype']
     print('saving row')
     description = request.POST['description']
-    campuslocation = request.POST['campuslocation']
+    campuslocation = request.POST['campusSelect']
     address = request.POST['address']
     last_four_digit=request.POST['lastfourdigit']
     postid='foundsensitive-'+username+'-'+str(timestamp)
@@ -139,23 +140,24 @@ def post_sensitive_item(request):
     # to send email to both the parties if there is a match.
     check_sensitive_lost_repo(cardtype,campuslocation,color,last_four_digit,username,postid)
 
-    return HttpResponse('<h1> post successful </h1>')
+    return 0, "post successful"
 
 
 @csrf_exempt
 def post_lost_general_item(request):
 
     timestamp=get_timestamp()
-    itemtype = request.POST['itemtype']
+    itemtype = request.POST['categorySelect']
     description = request.POST['description']
-    campuslocation = request.POST['campuslocation']
+    campuslocation = request.POST['campusSelect']
     address = request.POST['address']
-    username = request.POST['username']
+    username = request.user.username
     image = request.FILES['image']
-    userCount = Users.objects.filter(username=username).count()
+    #userCount = Users.objects.filter(username=username).count()
 
-    if userCount < 1:
-        return HttpResponse('<h1> username not registered </h1>')
+    #if userCount < 1:
+    if not request.user.is_authenticated:
+        return 1, "username not registered"
 
 
     postid='lostgeneral-'+username+'-'+str(timestamp)
@@ -173,23 +175,26 @@ def post_lost_general_item(request):
     lost_gen_item.postid=postid
     lost_gen_item.save()
 
-    return HttpResponse('<h1> post successful </h1>')
+    return 0, 'post successful'
 
 
 @csrf_exempt
 def post_general_item(request):
 
     timestamp=get_timestamp()
-    itemtype=request.POST['itemtype']
+    itemtype=request.POST['categorySelect']
     description=request.POST['description']
-    campuslocation=request.POST['campuslocation']
+    campuslocation=request.POST['campusSelect']
     address=request.POST['address']
-    username=request.POST['username']
+    username=request.user.username
+    
+    
     image = request.FILES['image']
-    userCount = Users.objects.filter(username=username).count()
-
-    if userCount <1 :
-        return HttpResponse('<h1> username not registered </h1>')
+    #userCount = Users.objects.filter(username=username).count()
+    #import pdb; pdb.set_trace()
+    if not request.user.is_authenticated:
+        return 1, "username not registered"
+        
 
     postid='foundgeneral-'+username+'-'+str(timestamp)
     url = str(uploadgcp(image,username))
@@ -206,40 +211,41 @@ def post_general_item(request):
 
     gen_item.save()
 
-    return HttpResponse('<h1> post successful </h1>')
+    return 0, "post successful"
 
-@csrf_exempt
+
 def validatecred(request):
 
-    username=request.GET['username']
-    password=request.GET['password']
+    username=request.POST['username']
+    password=request.POST['password']
     print('username is ', username, ' password is ', password)
     user=Users.objects.filter(username=username)
     if len(user) ==0:
-        return HttpResponse('<h1> No such user present </h1>')
+        return None
 
     user=Users.objects.filter(username=username)
     print(user[0].password)
     if password != user[0].password:
-        return HttpResponse('<h1> wrong password </h1>')
-    return HttpResponse('<h1> Login was successful  </h1>')
+        return None
+    return user[0]
 
 @csrf_exempt
 def post_lost_sensitive_item(request):
 
     timestamp=get_timestamp()
-    username = request.POST['username']
-    userCount = Users.objects.filter(username=username).count()
+    username = request.user.username
+    #userCount = Users.objects.filter(username=username).count()
 
-    if userCount < 1:
-        return HttpResponse('<h1> username not registered </h1>')
+    #if userCount < 1:
+    if not request.user.is_authenticated:
+        return 1,  'username not registered'
     postid='lostsensitive-'+username+'-'+str(timestamp)
 
     #sensitive = SensitiveFound()
-    color=request.POST['color']
+    #color=request.POST['color']
     cardtype = request.POST['cardtype']
     description = request.POST['description']
-    campuslocation = request.POST['campuslocation']
+    campuslocation = request.POST['campusSelect']
     address = request.POST['address']
     last_four_digit = request.POST['lastfourdigit']
 
@@ -252,7 +258,9 @@ def post_lost_sensitive_item(request):
     lost.username = username
     lost.campuslocation = campuslocation
     lost.address = address
-    lost.color = color
+    color=''
+    if 'color' in request.POST:
+        color=request.POST['color']
     lost.cardtype = cardtype
     lost.description = description
     lost.timestamp = timestamp
@@ -262,10 +270,11 @@ def post_lost_sensitive_item(request):
     print("saving the row")
     # to send email to both the parties if there is a match.
     check_sensitive_found_repo(cardtype, campuslocation, color, last_four_digit,username,postid)
-    return HttpResponse('<h1> Post successful </h1>')
+    return 0,  "Post successful"
 
-
+"""
 @csrf_exempt
+
 def display_lost_general_items(request):
     # called when some one reports that their item has been lost
     itemtype = request.GET['itemtype']
@@ -288,31 +297,111 @@ def display_lost_general_items(request):
         result['address'] = gen[i].address
         response[i]=result
 
-    return JsonResponse(response)
+    return JsonResponse(response)"""
+
+@csrf_exempt
+def post_found_item(request):
+    if request.method == "GET":
+        return render(request,'lostfound/post_form.html')
+    
+    else:
+        category = request.POST["categorySelect"]
+        if category == "Sensitive items":
+            err_status, err_message = post_sensitive_item(request)
+        else:
+            err_status, err_message = post_general_item(request)
+            
+        if err_status == 1:
+            return render(request,'lostfound/post_form.html',{"error_message":err_message})
+        else:
+            return render(request,'lostfound/post_form.html',{"message":err_message})
+
+@csrf_exempt
+def post_lost_item(request):
+    if request.method == "GET":
+        return render(request,'lostfound/post_form.html')
+    
+    else:
+        category = request.POST["categorySelect"]
+        if category == "Sensitive items":
+            err_status, err_message = post_lost_sensitive_item(request)
+        else:
+            err_status, err_message = post_lost_general_item(request)
+            
+        if err_status == 1:
+            return render(request,'lostfound/post_form.html',{"error_message":err_message})
+        else:
+            return render(request,'lostfound/post_form.html',{"message":err_message})
+  
+   
 
 @csrf_exempt
 def display_general_items(request):
     # called when some one reports that their item has been lost
-    itemtype = request.GET['itemtype']
-    campuslocation = request.GET['campuslocation']
+    
+    if request.method == "GET":
+        gen=general.objects.all().order_by('timestamp')[:30]
+        print("Return all items")
+        return render(request,'lostfound/found.html', { "search": gen,})
+    else:
+    
+        itemtype = request.POST['itemtype']
+        campuslocation = request.POST['campuslocation']
 
-    print('looking into ',itemtype,'  campuslocation ',campuslocation)
-    #color = request.GET['color']
-    gen=general.objects.filter(campuslocation=campuslocation,itemtype=itemtype).order_by('timestamp')
-    print(gen)
-    response={}
-    result={}
-    if len(gen)==0:
-        return HttpResponse('<h1> No result found  </h1>')
-    for i in range ( len(gen)) :
-        result['username']=gen[i].username
-        result['imagelink'] = gen[i].imagelink
-        result['itemtype'] = gen[i].itemtype
-        result['description'] = gen[i].description
-        result['campuslocation'] = gen[i].campuslocation
-        response[i]=result
+        print('looking into ',itemtype,'  campuslocation ',campuslocation)
+        #color = request.GET['color']
+        gen=general.objects.filter(campuslocation=campuslocation,itemtype=itemtype).order_by('timestamp')[:30]
+        print(gen)
+        response={}
+        search = []
+        print("Return filtered items")
+        """if len(gen)==0:
+            return HttpResponse('<h1> No result found  </h1>')
+        for i in range ( len(gen)) :
+            result={}
+            result['username']=gen[i].username
+            result['imagelink'] = gen[i].imagelink
+            result['itemtype'] = gen[i].itemtype
+            result['description'] = gen[i].description
+            result['campuslocation'] = gen[i].campuslocation
+            search.append(result)"""
+        
+    return render(request,'lostfound/found.html', {"search": gen,})
+    
+    
+@csrf_exempt
+def display_general_lost_items(request):
+    # called when some one reports that their item has been lost
+    
+    if request.method == "GET":
+        gen=GeneralLost.objects.all().order_by('timestamp')[:30]
+        print("Return all items")
+        return render(request,'lostfound/lost.html', { "search": gen,})
+    else:
+    
+        itemtype = request.POST['itemtype']
+        campuslocation = request.POST['campuslocation']
 
-    return JsonResponse(response)
+        print('looking into ',itemtype,'  campuslocation ',campuslocation)
+        #color = request.GET['color']
+        gen=GeneralLost.objects.filter(campuslocation=campuslocation,itemtype=itemtype).order_by('timestamp')[:30]
+        print(gen)
+        response={}
+        search = []
+        print("Return filtered items")
+        """if len(gen)==0:
+            return HttpResponse('<h1> No result found  </h1>')
+        for i in range ( len(gen)) :
+            result={}
+            result['username']=gen[i].username
+            result['imagelink'] = gen[i].imagelink
+            result['itemtype'] = gen[i].itemtype
+            result['description'] = gen[i].description
+            result['campuslocation'] = gen[i].campuslocation
+            search.append(result)"""
+        
+    return render(request,'lostfound/found.html', {"search": gen,})
+            
 
 def send_notification(username1,username2,user1_emailid,user2_emailid,resolve):
 
@@ -406,11 +495,31 @@ def check_sensitive_lost_repo(cardtype,campuslocation,color,lastfourdigit,found_
         # send email to the username of lost and found both
 
 @csrf_exempt
-def login(request):
+def login_user(request):
     #display login page
-    return render(request,'lostfound/login.html')
+    if request.method == "GET":
+        return render(request,'lostfound/login.html')
+    else:
+        
+        username = request.POST["username"]
+        passwd = request.POST["password"]
+        
+        #user = validatecred(request)
+        user = authenticate(request, username=username,password=passwd)
+        if user is None:
+            return render(request,'lostfound/login.html', {"username":request.POST["username"],
+                                                            "password": request.POST["password"],
+                                                            "error_message": "Username or password is invalid"})
+        
+        login(request,user)
+        return HttpResponseRedirect('/lostfound/homepage/')
+        
+@csrf_exempt
+def logout(request):
+    logout(request)
+    return HttpResponseRedirect('/lostfound/login/')
 
-
+    
 def resolvePost(request):
     post=request.GET['postid']
     requesttype=post.split("-")[0]
@@ -427,6 +536,12 @@ def resolvePost(request):
 
     #table.objects.filter(postid=post)[0].update(displayflag=False)
     return HttpResponse('<h1> successfully updated table  </h1>')
+
+
+@csrf_exempt
+def homepage(request):
+    return HttpResponse('<h1> Welcome to homepage </h1>')                                                          
+                                                            
 
 def found(request):
     return HttpResponse('<h1> Report anything that you have found </h1>')

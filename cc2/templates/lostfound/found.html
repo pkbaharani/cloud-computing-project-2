@@ -4,19 +4,19 @@
 <div class="row">
         <div class="col-9">
           <h5>Filter here</h5>
-          <form action="." method="post">
+          <form action="." method="post">{% csrf_token %}
             <div class="form-row">
               <div class="form-group col-md-4">
                 <select id="itemtype" name="itemtype" class="form-control">
                   <option selected="true" disabled="disabled">Select Item Category</option>
-                  <option>Electronics</option>
-                  <option>Bags, Baggage, Luggage</option>
-                  <option>Clothing</option>
-                  <option>Documents / literature (non-sensitive)</option>
-                  <option>Electronics</option>
-                  <option>Jewelry</option>
-                  <option>Personal Accessories</option>
-                  <option>Sensitive items (passport, id card, credit cards)</option>
+                  <option value="Electronics">Electronics</option>
+              <option value="Bags, Baggage, Luggage">Bags, Baggage, Luggage</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Non Sensitive Documents">Documents / literature (non-sensitive)</option>
+              <option value="Jewelry">Jewelry</option>
+              <option value="Personal">Personal Accessories</option>
+              <option value="Sensitive items">Sensitive items (passport, id card, credit cards)</option>
+              <option value="Others">Others</option>
                   <option>Others</option>
                 </select>
               </div>
@@ -24,12 +24,11 @@
               <div class="form-group col-md-4">
                 <select id="campuslocation" name="campuslocation" class="form-control">
                   <option selected="true" disabled="disabled">Select Campus</option>
-                  <option>Downtown Phoenix Campus</option>
-                  <option>Tempe Campus</option>
-                  <option>Colleges at Lake Havasu City</option>
-                  <option>Polytechnic Campus</option>
-                  <option>West Campus</option>port, id card, credit cards)</option>
-                  <option>Others</option>
+                  <option value="Downtown Phoenix Campus">Downtown Phoenix Campus</option>
+              <option value="Tempe Campus">Tempe Campus</option>
+              <option value="Colleges at Lake Havasu City">Colleges at Lake Havasu City</option>
+              <option value="Polytechnic Campus">Polytechnic Campus</option>
+              <option value="West Campus">West Campus</option>
                 </select>
               </div>
               <div class="form-group col-md-4">
