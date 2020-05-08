@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns=[path('',views.home,name='Lost-Found-Home'),
              path('login/',views.login_user,name='Lost-Found-Login'),
+             path('logout/',views.logout_user,name='Lost-Found-Logout'),
              path('found/',views.found,name='Report any found item '),
              path('search/',views.search,name='Search general stuff'),
              path('sensitivesearch/',views.sensitive_search,name='Enter details to search for sensitve item'),
@@ -17,5 +18,6 @@ urlpatterns=[path('',views.home,name='Lost-Found-Home'),
              path('resolve/',views.resolvePost,name='resolve post'),
              path('display_found_items/',views.display_general_items,name='new post item'),
              path('homepage/',views.homepage,name='Homepage of user'),
-             path('postfounditem/', views.post_found_item, name=" Post generic or sensitive document"),
+             path('postfounditem/', views.post_found_item, name=" Post generic or sensitive found document"),
+             path('postlostitem/', views.post_lost_item, name=" Post generic or sensitive  lost document"),
              ]

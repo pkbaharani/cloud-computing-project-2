@@ -51,14 +51,14 @@
           </thead>
           
           <tbody>
-            {% for i in list %}
+            {% for item in search %}
 
                 <tr>
-                  <th scope="row"></th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
+                  <th scope="row">{{item.id}}</th>
+                  <td><img src="{{item.imagelink}}"  height="100"/></td>
+                  <td>{{item.itemtype}}</td>
+                  <td>{{item.description}}</td>
+                  <td>{{item.campuslocation}}</td>
                 </tr>
             {% endfor %}
           </tbody>
