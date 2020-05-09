@@ -59,7 +59,9 @@ def obscene_detection(image):
 
 @csrf_exempt
 def register(request):
-
+    if request.user.is_authenticated:
+        return HttpResponseRedirect('/lostfound/homepage/')
+        
     if request.method == "GET":
         return render(request,'lostfound/signup.html')
     else:
@@ -185,10 +187,6 @@ def post_lost_general_item(request):
     image = request.FILES['image']
     #userCount = Users.objects.filter(username=username).count()
 
-    #if userCount < 1:
-    if not request.user.is_authenticated:
-        return 1, "username not registered"
-
 
     postid='lostgeneral-'+username+'-'+str(timestamp)
     lost_gen_item = GeneralLost()
@@ -205,8 +203,8 @@ def post_lost_general_item(request):
     if image != None:
         flag = obscene_detection(image.file)
         if flag == True:
-            return 1, 'post unsuccessful'
-            url = str(uploadgcp(image, username))
+            return 1, request["POST"]
+        url = str(uploadgcp(image, username))
 
 
     lost_gen_item.imagelink = url
@@ -232,8 +230,6 @@ def post_general_item(request):
     image = request.FILES['image']
     #userCount = Users.objects.filter(username=username).count()
     #import pdb; pdb.set_trace()
-    if not request.user.is_authenticated:
-        return 1, "username not registered"
         
 
     postid='foundgeneral-'+username+'-'+str(timestamp)
@@ -244,7 +240,7 @@ def post_general_item(request):
     if image != None:
         flag = obscene_detection(image.file)
         if flag == True:
-            return 1, 'post unsuccessful'
+            return 1, request["POST"]
             url = str(uploadgcp(image, username))
 
     #url = str(uploadgcp(image,username))
@@ -289,8 +285,6 @@ def post_lost_sensitive_item(request):
     #userCount = Users.objects.filter(username=username).count()
 
     #if userCount < 1:
-    if not request.user.is_authenticated:
-        return 1,  'username not registered'
     postid='lostsensitive-'+username+'-'+str(timestamp)
 
     #sensitive = SensitiveFound()
@@ -371,7 +365,9 @@ def post_found_item(request):
             err_status, err_message = post_general_item(request)
             
         if err_status == 1:
-            return render(request,'lostfound/post_form.html',{"error_message":err_message})
+            error_msg = "post unsuccessful"
+            err_message["error_message"] = error_msg
+            return render(request,'lostfound/post_form.html',error_message)
         else:
             return render(request,'lostfound/post_form.html',{"message":err_message})
 
@@ -388,7 +384,9 @@ def post_lost_item(request):
             err_status, err_message = post_lost_general_item(request)
             
         if err_status == 1:
-            return render(request,'lostfound/post_form.html',{"error_message":err_message})
+            error_msg = "post unsuccessful"
+            err_message["error_message"] = error_msg
+            return render(request,'lostfound/post_form.html',error_message)
         else:
             return render(request,'lostfound/post_form.html',{"message":err_message})
   
@@ -398,8 +396,11 @@ def post_lost_item(request):
 def display_general_items(request):
     # called when some one reports that their item has been lost
     
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/lostfound/login/')
+        
     if request.method == "GET":
-        gen=general.objects.all().order_by('timestamp')[:30]
+        gen=general.objects.filter(displayflag=True).order_by('timestamp')[:30]
         print("Return all items")
         return render(request,'lostfound/found.html', { "search": gen,})
     else:
@@ -409,7 +410,7 @@ def display_general_items(request):
 
         print('looking into ',itemtype,'  campuslocation ',campuslocation)
         #color = request.GET['color']
-        gen=general.objects.filter(campuslocation=campuslocation,itemtype=itemtype).order_by('timestamp')[:30]
+        gen=general.objects.filter(campuslocation=campuslocation,itemtype=itemtype,displayflag=True).order_by('timestamp')[:30]
         print(gen)
         response={}
         search = []
@@ -432,8 +433,10 @@ def display_general_items(request):
 def display_general_lost_items(request):
     # called when some one reports that their item has been lost
     
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/lostfound/login/')
     if request.method == "GET":
-        gen=GeneralLost.objects.all().order_by('timestamp')[:30]
+        gen=GeneralLost.objects.filter(displayflag=True).order_by('timestamp')[:30]
         print(gen)
         print("Return all items")
         return render(request,'lostfound/lost.html', { "search": gen,})
@@ -444,7 +447,7 @@ def display_general_lost_items(request):
 
         print('looking into ',itemtype,'  campuslocation ',campuslocation)
         #color = request.GET['color']
-        gen=GeneralLost.objects.filter(campuslocation=campuslocation,itemtype=itemtype).order_by('timestamp')[:30]
+        gen=GeneralLost.objects.filter(campuslocation=campuslocation,itemtype=itemtype,displayflag=True).order_by('timestamp')[:30]
         print(gen)
         response={}
         search = []
@@ -563,6 +566,8 @@ def check_sensitive_lost_repo(cardtype,campuslocation,color,lastfourdigit,found_
 @csrf_exempt
 def login_user(request):
     #display login page
+    if request.user.is_authenticated:
+        return HttpResponseRedirect('/lostfound/homepage/')
     if request.method == "GET":
         return render(request,'lostfound/login.html')
     else:
@@ -611,6 +616,8 @@ def resolvePost(request):
 
 @csrf_exempt
 def homepage(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/lostfound/login/')
     return render(request,'lostfound/homepage.html')                                                         
                                                             
 
