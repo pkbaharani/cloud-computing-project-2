@@ -22,6 +22,13 @@ $(document).ready(function(){
     }).change();
 });
 </script>
+
+<style type="text/css">
+  label {
+    font-weight: bold;
+  }
+</style>
+
 {%endblock%}
 
 {%block content%}
@@ -29,7 +36,7 @@ $(document).ready(function(){
 <p>{{message}}</p>
  <form action="." method="post" enctype="multipart/form-data">{% csrf_token %}
           <div class="form-group">
-            <label for="categorySelect">Please select category</label>
+            <label for="categorySelect">Select category</label>
             <select class="form-control" name="categorySelect" id="categorySelect">
               <option value="Electronics">Electronics</option>
               <option value="Bags, Baggage, Luggage">Bags, Baggage, Luggage</option>
@@ -44,16 +51,16 @@ $(document).ready(function(){
 
           <div class="form-group">
             <label for="postTitle">Post Title</label>
-            <input class="form-control" type="text" placeholder="Ex. Found black Garmin watch near SDFC" id="postTitle" name="title">
+            <input class="form-control" type="text" placeholder="Ex. Found black Garmin watch near SDFC" id="postTitle" name="title" required>
           </div>
 
           <div class="form-group">
-            <label for="dateSelect">Found Date</label>
-            <input class="form-control" type="text" id="dateSelect" name="lost_found_date">
+            <label for="dateSelect">Found date</label>
+            <input class="form-control" type="text" id="dateSelect" name="lost_found_date" required>
           </div>
 
           <div class="form-group">
-            <label for="campusSelect">Please select campus</label>
+            <label for="campusSelect">Select campus</label>
             <select class="form-control" id="campusSelect" name="campusSelect">
               <option value="Downtown Phoenix Campus">Downtown Phoenix Campus</option>
               <option value="Tempe Campus">Tempe Campus</option>
@@ -69,7 +76,7 @@ $(document).ready(function(){
           </div>
           
           <div class="form-group" id="subcategory">
-            <label for="cardtype">Please select sub category</label>
+            <label for="cardtype">Select sub category</label>
             <select class="form-control" id="cardtype" name="cardtype">
               <option value="Passport">Passport</option>
               <option value="SSN">SSN</option>
@@ -91,8 +98,8 @@ $(document).ready(function(){
           </div>
 
           <div class="form-group" id="itemImage">
-            <label for="image">Upload Item's Image</label>
-            <input type="file" class="form-control-file" id="image" name="image">
+            <label for="image">Upload item's image</label>
+            <input type="file" class="form-control-file" id="image" name="image" accept=".jpg,.png,.jpeg">
           </div>
         
 
