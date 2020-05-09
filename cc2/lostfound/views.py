@@ -206,7 +206,7 @@ def post_lost_general_item(request):
         flag = obscene_detection(image.file)
         if flag == True:
             return 1, 'post unsuccessful'
-        url = str(uploadgcp(image, username))
+            url = str(uploadgcp(image, username))
 
 
     lost_gen_item.imagelink = url
@@ -237,7 +237,17 @@ def post_general_item(request):
         
 
     postid='foundgeneral-'+username+'-'+str(timestamp)
-    url = str(uploadgcp(image,username))
+
+
+
+    url=""
+    if image != None:
+        flag = obscene_detection(image.file)
+        if flag == True:
+            return 1, 'post unsuccessful'
+            url = str(uploadgcp(image, username))
+
+    #url = str(uploadgcp(image,username))
 
     gen_item=general()
     gen_item.user = request.user
