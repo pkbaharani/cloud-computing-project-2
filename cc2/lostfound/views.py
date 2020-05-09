@@ -9,20 +9,29 @@ from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from datetime import datetime
 from time import time
-
-
+from .cloud_vision import validate_image
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from google.cloud import storage
 from django.conf import settings
 
 
-from gcloud import storage
+# Imports the Google Cloud client library
+from google.cloud import vision
+from google.cloud.vision import types
+
+
+
+
+#from gcloud import storage
 from oauth2client.service_account import ServiceAccountCredentials
 #from .models import Users
 from .models import GeneralFound as general
 from .models import SensitiveFound
 from .models import SensitiveLost
 from .models import GeneralLost
+#import cloudstorage
+
 
 # Create your views here.
 sender_id='sun.devils.lost.found@gmail.com'
@@ -44,6 +53,8 @@ gcreds={
 def home(request):
     return HttpResponse('<h1> Lost and Found Home. You can \n search lost item \n report any item found \n search sensitive item </h1>')
 
+def obscene_detection(image):
+    return validate_image(image,False)
 
 
 @csrf_exempt
@@ -85,12 +96,17 @@ def get_timestamp():
 
 
 def uploadgcp(image,username):
+
+
+
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(
         gcreds
     )
 
     imagename=username+str(get_timestamp())
-    client = storage.Client(credentials=credentials,project='cloudcomputing-2')
+    #client = storage.Client(credentials=credentials,project='cloudcomputing-2')
+    #client= storage.Client.from_service_account_json('creds.json')
+    client = storage.Client()
     bucket = client.get_bucket('cc2-image-db')
     blob = bucket.blob(imagename,chunk_size=262144)
     '''
@@ -187,7 +203,12 @@ def post_lost_general_item(request):
 
     url=""
     if image != None:
+        flag = obscene_detection(image.file)
+        if flag == True:
+            return 1, 'post unsuccessful'
         url = str(uploadgcp(image, username))
+
+
     lost_gen_item.imagelink = url
     lost_gen_item.postid=postid
     lost_gen_item.save()
