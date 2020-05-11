@@ -32,6 +32,18 @@ $(document).ready(function(){
 {%endblock%}
 
 {%block content%}
+{% if error_message != "" %}
+<div class="row justify-content-center">
+		<span class="text-danger"><h3>{{error_message}}</h3></span>
+</div>
+{% endif %}
+
+{% if message != " %}
+<div class="row justify-content-center">
+		<span class="text-success"><h3>{{error_message}}</h3></span>
+</div>
+{% endif %}
+
 <p>{{error_message}}</p>
 <p>{{message}}</p>
  <form action="." method="post" enctype="multipart/form-data">{% csrf_token %}
